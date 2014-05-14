@@ -1,5 +1,8 @@
 module FileReader where
 
+{-| FileReader module for elm, to be documented, promise
+-}
+
 import Signal(Signal)
 import Basics(String)
 import Date(Date)

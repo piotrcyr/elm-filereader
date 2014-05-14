@@ -9,7 +9,9 @@ Elm.Native.FileReader.make = function(elm) {
     var fromTime    = Elm.Native.Date.make(elm).fromTime;
     var newElement  = Elm.Graphics.Element.make(elm).newElement;
     var newNode     = ElmRuntime.use(ElmRuntime.Render.Utils).newElement;
-    
+    var render      = ElmRuntime.use(ElmRuntime.Render.Element).render;
+    var update      = ElmRuntime.use(ElmRuntime.Render.Element).update;
+        
     function renderFileInput(model) {        
         var node = newNode('input');
         node.type = 'file'
@@ -44,17 +46,35 @@ Elm.Native.FileReader.make = function(elm) {
     function fileDroppable(signal, elem){
         
         function onDrop(event) {
-            console.log(event)
+            event.stopPropagation();
+            event.preventDefault();
             var file    = event.dataTransfer.files[0]
                         ? { ctor:"Just", _0:event.dataTransfer.files[0] }
                         : { ctor:"Nothing" }
                         ;
-            elm.notify(signal.id, handler(file));
-        }        
-        var props = Utils.replace([['drop', onDrop]], elem.props);
-        console.log(props, elem)
-        //elem.addEventListener('drop', onDrop);
-        return { props:props, element:elem.element };
+            elm.notify(signal.id, file);
+            return false;
+        }
+
+        return A3(newElement, elem.props.width, elem.props.height, {
+            ctor: 'Custom',
+            type: 'FileInput',
+            render: function(model) {                
+                var elem = model.element
+                var props = model.props
+                var node = render({ props:props, element:elem });
+                
+                node.addEventListener('dragover', function(event){ event.stopPropagation(); event.preventDefault(); return false});
+                node.addEventListener('drop', onDrop);
+                return node;                
+            },            
+            update: function(node, curr, next) {                
+                update(node, curr, next);
+                return true;
+            },
+            model: {props:elem.props, element: elem.element}
+        });
+
     }
 
     function readAsText(file){
