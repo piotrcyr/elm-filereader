@@ -9,12 +9,12 @@ Elm.Native.FileReader.make = function(elm) {
     var fromTime    = Elm.Native.Date.make(elm).fromTime;
     var newElement  = Elm.Graphics.Element.make(elm).newElement;
     var newNode     = ElmRuntime.use(ElmRuntime.Render.Utils).newElement;
-    var render      = ElmRuntime.use(ElmRuntime.Render.Element).render;
-    var update      = ElmRuntime.use(ElmRuntime.Render.Element).update;
+    var elementRender = ElmRuntime.use(ElmRuntime.Render.Element).render;
+    var elementUpdate = ElmRuntime.use(ElmRuntime.Render.Element).update;
         
     function renderFileInput(model) {        
         var node = newNode('input');
-        node.type = 'file'
+        node.type = 'file';
         node.style.display = 'block';
         node.style.pointerEvents = 'auto';
         node.elm_signal = model.signal;
@@ -41,10 +41,42 @@ Elm.Native.FileReader.make = function(elm) {
             update: updateFileInput,
             model: { signal:signal, handler:handler }
         });
-    } 
+    }
+
+    function customFileInput(signal, handler, e) {
+        var element = e.element;
+        var props = e.props;
+        return A3(newElement, props.width, props.height, {
+            ctor: 'Custom',
+            type: 'FileInput',
+            render: function(model) {
+                var hidden = renderFileInput(model);                
+                var elem = model.element;
+                var props = model.props;
+                var node = elementRender({ props:props, element:elem });                
+                node.addEventListener('click', function(event) { 
+                    event.stopPropagation();
+                    event.preventDefault();
+                    var click = new MouseEvent('click', {
+                        'view': window,
+                        'bubbles': true,
+                        'cancelable': true
+                    });            
+                    hidden.dispatchEvent(click);
+                    return false;
+                });
+                return node;
+            },
+            update: function(node, curr, next) {
+                elementUpdate(node, curr, next);
+                return true;
+            },
+            model: { props: props, element: element, signal: signal, handler: handler }
+        });
+    }
 
     function fileDroppable(signal, elem){
-        
+
         function onDrop(event) {
             event.stopPropagation();
             event.preventDefault();
@@ -54,22 +86,27 @@ Elm.Native.FileReader.make = function(elm) {
                         ;
             elm.notify(signal.id, file);
             return false;
-        }
+        };
+
+        function onDragover(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            return false;
+        };
 
         return A3(newElement, elem.props.width, elem.props.height, {
             ctor: 'Custom',
-            type: 'FileInput',
+            type: 'FileInput',            
             render: function(model) {                
-                var elem = model.element
-                var props = model.props
-                var node = render({ props:props, element:elem });
-                
-                node.addEventListener('dragover', function(event){ event.stopPropagation(); event.preventDefault(); return false});
+                var elem = model.element;
+                var props = model.props;
+                var node = elementRender({ props:props, element:elem });                
+                node.addEventListener('dragover', onDragover);
                 node.addEventListener('drop', onDrop);
-                return node;                
+                return node;
             },            
             update: function(node, curr, next) {                
-                update(node, curr, next);
+                elementUpdate(node, curr, next);
                 return true;
             },
             model: {props:elem.props, element: elem.element}
@@ -133,6 +170,7 @@ Elm.Native.FileReader.make = function(elm) {
 
     return elm.Native.FileReader.values = {
         fileInput  : F2(fileInput),
+        customFileInput  : F3(customFileInput),
         fileDroppable  : F2(fileDroppable),
         readAsText : readAsText,
         slice      : F3(slice),
