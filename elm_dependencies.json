@@ -1,5 +1,5 @@
 {
-    "version": "0.1",
+    "version": "0.2",
     "summary": "File reading capabilities for elm",
     "description": "This library provides Elm with functionalities of HTML5 FileReader object.",
     "license": "BSD3",

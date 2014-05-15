@@ -28,6 +28,9 @@ data FileReader a   = Ready
 fileInput : Handle a -> (Maybe File -> a) -> Element
 fileInput = Native.FileReader.fileInput
 
+customFileInput : Handle a -> (Maybe File -> a) -> Element -> Element
+customFileInput = Native.FileReader.customFileInput
+
 fileDroppable : Handle a -> Element -> Element
 fileDroppable = Native.FileReader.fileDroppable
 
