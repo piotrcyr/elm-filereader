@@ -1,11 +1,11 @@
 {
-    "version": "0.2",
+    "version": "0.2.0.2",
     "summary": "File reading capabilities for elm",
     "description": "This library provides Elm with functionalities of HTML5 FileReader object.",
     "license": "BSD3",
     "exposed-modules": ["FileReader"],
     "native-modules": ["Native.FileReader"],
-    "elm-version": "0.12.1.3",
+    "elm-version": "0.12.2.0",
     "dependencies": {},
     "repository": "https://github.com/piotrcyr/elm-filereader.git"
 }
