@@ -2,3 +2,4 @@ build/*
 cache/*
 demos/*
 docs/*
+legacy/*

@@ -5,7 +5,7 @@
     "license": "BSD3",
     "exposed-modules": ["FileReader"],
     "native-modules": ["Native.FileReader"],
-    "elm-version": "0.12.2.0",
+    "elm-version": "0.12.2",
     "dependencies": {},
     "repository": "https://github.com/piotrcyr/elm-filereader.git"
 }
