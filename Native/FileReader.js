@@ -8,6 +8,8 @@ Elm.Native.FileReader.make = function(elm) {
     var Utils       = Elm.Native.Utils.make(elm);
     var fromTime    = Elm.Native.Date.make(elm).fromTime;
     var newElement  = Elm.Graphics.Element.make(elm).newElement;
+    var Just       = Elm.Maybe.make(elm).Just;
+    var Nothing       = Elm.Maybe.make(elm).Nothing;
     var newNode     = ElmRuntime.use(ElmRuntime.Render.Utils).newElement;
     var elementRender = ElmRuntime.use(ElmRuntime.Render.Element).render;
     var elementUpdate = ElmRuntime.use(ElmRuntime.Render.Element).update;
@@ -21,8 +23,8 @@ Elm.Native.FileReader.make = function(elm) {
         node.elm_handler = model.handler;
         function change() {
             var file    = node.files[0]
-                        ? { ctor:"Just", _0:node.files[0] }
-                        : { ctor:"Nothing" }
+                        ? Just(node.files[0])
+                        : Nothing
                         ;
             elm.notify(node.elm_signal.id, node.elm_handler(file));
         }
@@ -81,8 +83,8 @@ Elm.Native.FileReader.make = function(elm) {
             event.stopPropagation();
             event.preventDefault();
             var file    = event.dataTransfer.files[0]
-                        ? { ctor:"Just", _0:event.dataTransfer.files[0] }
-                        : { ctor:"Nothing" }
+                        ? Just(event.dataTransfer.files[0])
+                        : Nothing
                         ;
             elm.notify(signal.id, file);
             return false;
@@ -143,9 +145,9 @@ Elm.Native.FileReader.make = function(elm) {
         var reader = file.reader;
         var fileReader = file.fileReader;
 
-        function updateReader(file) {        
-            if (file.ctor !== "Nothing"){               
-                if (!reader.running){                    
+        function updateReader(file) {
+            if (file.ctor !== Nothing.ctor){
+                if (!reader.running){
                     reader.running = true;
                     reader.readAsText(file._0);
                 }
@@ -165,7 +167,7 @@ Elm.Native.FileReader.make = function(elm) {
     }
 
     function mimeType(blob) {
-        return blob.type ? { ctor:'Just', _0:blob.type } : { ctor:'Nothing' };
+        return blob.type ? Just(blob.type) : Nothing;
     }
 
     return elm.Native.FileReader.values = {

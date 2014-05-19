@@ -94,7 +94,7 @@ file:
 a value of (`Progress` `total` `loaded`) where `total` is the total work to be
 done in bytes and loaded is the work performed so far.
 * after the loading ends the signal is updated to `Success` with the file contents
-returned.
+returned as `String`.
 -}
 readAsText : Signal (Maybe (Blob a)) -> Signal (FileReader String)
 readAsText = Native.FileReader.readAsText
