@@ -26,26 +26,35 @@ additional information, we call that blob a `File`.
 
 -}
 
-import Signal(Signal)
-import Basics(String)
 import Date(Date)
-import Graphics.Input (Handle)
+import Graphics.Input(Handle)
 import Native.FileReader
 
-type Blob a = { a | size : Int }
-
-type File = Blob { name : String, lastModifiedDate: Date }
-
-data Error  = NOT_FOUND_ERR
-            | SECURITY_ERR
-            | NOT_READABLE_ERR
-            | ENCODING_ERR
-            | ABORT_ERR
+data Error  = NotFound
+            | Security
+            | NotReadable
+            | Encoding
+            | Abort
 
 data FileReader a   = Ready
                     | Success a
                     | Progress Int Int
                     | Error Error
+
+data Blob = Blob
+data File = File
+
+name : File -> String
+name = Native.FileReader.name
+
+size : Blob -> Int
+size = Native.FileReader.size
+
+lastModifiedDate : File -> Date
+lastModifiedDate = Native.FileReader.lastModifiedDate
+
+asBlob : File -> Blob
+asBlob = Native.FileReader.asBlob
 
 {-| This is how you would create a basic file input.
 
@@ -96,7 +105,7 @@ done in bytes and loaded is the work performed so far.
 * after the loading ends the signal is updated to `Success` with the file contents
 returned as `String`.
 -}
-readAsText : Signal (Maybe (Blob a)) -> Signal (FileReader String)
+readAsText : Signal (Maybe Blob) -> Signal (FileReader String)
 readAsText = Native.FileReader.readAsText
 
 results : FileReader String -> Maybe String
@@ -120,12 +129,12 @@ the new `Blob`. If you specify a negative value, it's treated as an offset
 from the end of the `Blob` toward the beginning. For example, -10 would be
 the 10th from last byte in the `Blob`.
 -}
-slice : Int -> Int -> Blob a -> Blob {}
+slice : Int -> Int -> Blob -> Blob
 slice = Native.FileReader.slice
 
 {-| Returns a (`Just` type) value indicating the MIME type of the data contained
 in the `Blob`.
 If the type is unknown, returns `Nothing`.
 -}
-mimeType : Blob a -> Maybe String
+mimeType : Blob -> Maybe String
 mimeType = Native.FileReader.mimeType

@@ -125,7 +125,7 @@ Elm.Native.FileReader.make = function(elm) {
             
             reader.onerror = function(event) {
                 console.log(event)
-                //elm.notify(fileReader.id, { ctor:'Error', _0: });
+                //elm.notify(fileReader.id, Error());
             };
 
             reader.onprogress = function(event) {
@@ -146,8 +146,8 @@ Elm.Native.FileReader.make = function(elm) {
         var fileReader = file.fileReader;
 
         function updateReader(file) {
-            if (file.ctor !== Nothing.ctor){
-                if (!reader.running){
+            if (file.ctor !== Nothing.ctor) {
+                if (!reader.running) {
                     reader.running = true;
                     reader.readAsText(file._0);
                 }
@@ -162,12 +162,69 @@ Elm.Native.FileReader.make = function(elm) {
         //return A2(Signal.lift, updateReader, file).value;
     }
 
+    Blob.empty = new Blob();
+    Blob.prototype._slice = Blob.prototype.slice;
+    Blob.prototype.slice = function(start, end) {
+        if (!this.source) {
+            this.source = this;
+        }
+
+        if (!this.source.slices) {
+            this.source.slices = [];
+        }
+
+        if (!this.start) {
+            this.start = 0;
+        }
+
+        if (!this.end) {
+            this.end = this.size;
+        }
+
+        var start = (start >= 0) ? this.start + start : this.end + start,
+            end = (end >= 0) ? this.start + end : this.end + end,
+            blob;
+        
+        if (start > this.size || start < 0            
+            || end < 0 || end < start){
+            return Blob.empty;
+        }
+
+        if (!this.source.slices[start]) {            
+            this.source.slices[start] = [];
+        }
+
+        if (!this.source.slices[start][end]){            
+            blob = this.source._slice(start, end);
+            blob.source = this.source;
+            blob.start = start;
+            blob.end = end;
+            this.source.slices[start][end] = blob;
+        }
+
+        blob = this.source.slices[start][end];
+
+        return blob;
+    };
+
     function slice(start, end, blob) {
         return blob.slice(start, end);
     }
 
+    function lastModifiedDate(file) {
+        return file.lastModifiedDate
+    }
+
     function mimeType(blob) {
         return blob.type ? Just(blob.type) : Nothing;
+    }
+
+    function size(blob) {
+        return blob.size;
+    }
+
+    function asBlob(file) {        
+        return file;
     }
 
     return elm.Native.FileReader.values = {
@@ -176,7 +233,10 @@ Elm.Native.FileReader.make = function(elm) {
         fileDroppable  : F2(fileDroppable),
         readAsText : readAsText,
         slice      : F3(slice),
+        lastModifiedDate : lastModifiedDate,
         mimeType   : mimeType,
+        size       : size,
+        asBlob     : asBlob,
     };
 
 };
